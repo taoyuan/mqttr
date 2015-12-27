@@ -1,0 +1,41 @@
+{
+  "name": "mqttr",
+  "version": "0.0.0",
+  "description": "A routable mqtt library based on mqtt.js",
+  "homepage": "",
+  "author": {
+    "name": "taoyuan",
+    "email": "towyuan@outlook.com",
+    "url": ""
+  },
+  "files": [
+    "lib"
+  ],
+  "main": "lib/index.js",
+  "keywords": [
+    "mqtt",
+    "router",
+    "client"
+  ],
+  "repository": "https://github.com/taoyuan/mqttr",
+  "devDependencies": {
+    "gulp": "^3.6.0",
+    "gulp-eslint": "^1.0.0",
+    "gulp-exclude-gitignore": "^1.0.0",
+    "gulp-istanbul": "^0.9.0",
+    "gulp-mocha": "^2.0.0",
+    "gulp-plumber": "^1.0.0",
+    "gulp-nsp": "^2.1.0",
+    "gulp-coveralls": "^0.1.0"
+  },
+  "scripts": {
+    "prepublish": "gulp prepublish",
+    "test": "gulp"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "async": "^1.5.0",
+    "debug": "^2.2.0",
+    "mqtt": "^1.6.3"
+  }
+}
