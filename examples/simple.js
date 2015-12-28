@@ -33,6 +33,7 @@ client.subscribe('/users/:userid/message/:messageid/*', function (topic, message
   console.log('params :', context.params);    // { userid: 'taoyuan', messageid: 4321 }
   console.log('slats  :', context.splats);    // [ 'ping' ]
   console.log('path   :', context.path);      // '/users/:userid/message/:messageid/:method'
+  console.log('packet :', context.packet);    // {...} packet received packet, as defined in mqtt-packet
   console.log();
 });
 
