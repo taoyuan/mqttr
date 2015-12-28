@@ -35,9 +35,9 @@ client.on('error', function (err) {
   throw err;
 });
 
-client.subscribe('/users/:userid/message/:messageid/*', function (topic, data, route) {
+client.subscribe('/users/:userid/message/:messageid/*', function (topic, message, route) {
   console.log('-------------------------------------------------');
-  console.log('data   :', data);            // { hello: 'world' }
+  console.log('message:', message);            // { hello: 'world' }
   console.log('topic  :', route.topic);     // '/users/ty/message/4321/ping'
   console.log('params :', route.params);    // { userid: 'taoyuan', messageid: 4321 }
   console.log('slats  :', route.splats);    // [ 'ping' ]
