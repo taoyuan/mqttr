@@ -10,15 +10,19 @@ function getPort(cb) {
   portrange += 1;
 
   var server = net.createServer();
+
   server.listen(port, function (err) {
+    if (err) throw err;
     server.once('close', function () {
       cb(port);
     });
     server.close();
   });
+
   server.on('error', function (err) {
+    if (err) throw err;
     getPort(cb);
-  })
+  });
 }
 
 exports.createMqttServer = function (settings, cb) {
@@ -37,10 +41,10 @@ exports.createMqttServer = function (settings, cb) {
     });
   }
 
-  function createServer(settings) {
-    var server = new mosca.Server(settings);
-    server.url = 'mqtt://127.0.0.1:' + settings.port;
-    server.port = settings.port;
+  function createServer(options) {
+    var server = new mosca.Server(options);
+    server.url = 'mqtt://127.0.0.1:' + options.port;
+    server.port = options.port;
     return server;
   }
 

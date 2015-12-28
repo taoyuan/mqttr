@@ -10,9 +10,10 @@ describe('Client', function () {
 
   before(function (done) {
     s.createMqttServer(function (err, _server) {
+      if (err) throw err;
       server = _server;
       done();
-    })
+    });
   });
 
   after(function (done) {
