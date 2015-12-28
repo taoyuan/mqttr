@@ -1,6 +1,6 @@
 {
   "name": "mqttr",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "A routable mqtt library based on mqtt.js",
   "homepage": "",
   "author": {
