@@ -9,7 +9,7 @@ describe('Client', function () {
   var server, client;
 
   before(function (done) {
-    s.createMqttServer(function (err, _server) {
+    s.createMqttServer({logger: {level: 'debug'}}, function (err, _server) {
       if (err) throw err;
       server = _server;
       done();
@@ -42,14 +42,17 @@ describe('Client', function () {
 
   });
 
-
-  it('should work with $ topic', function (done) {
-    var data = {boo: 'foo'};
-    client.subscribe('$tom', function (topic, message) {
-      t.deepEqual(data, message);
-      done();
+  it.only('should work with two clients', function (done) {
+    var client2 = mqttr.connect(server.url);
+    client2.subscribe('$hello/:name', function (topic, message, matched) {
+      t.equal(matched.params.name, 'foo');
+      t.deepEqual(message, {a: 1});
+      client2.end(done);
     });
-    client.publish('$tom', data);
+
+    client2.ready(function () {
+      client.publish('$hello/foo', {a: 1});
+    });
   });
 
   it('should work with char wild char', function (done) {
