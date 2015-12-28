@@ -9,7 +9,7 @@ describe('Client', function () {
   var server, client;
 
   before(function (done) {
-    s.createMqttServer({logger: {level: 'debug'}}, function (err, _server) {
+    s.createMqttServer({logger: {level: 'error'}}, function (err, _server) {
       if (err) throw err;
       server = _server;
       done();
@@ -42,7 +42,7 @@ describe('Client', function () {
 
   });
 
-  it.only('should work with two clients', function (done) {
+  it('should work with two clients', function (done) {
     var client2 = mqttr.connect(server.url);
     client2.subscribe('$hello/:name', function (topic, message, matched) {
       t.equal(matched.params.name, 'foo');
