@@ -25,17 +25,26 @@ client.on('error', function (err) {
   throw err;
 });
 
-client.subscribe('/users/:userid/message/:messageid/*', function (topic, message, route) {
+// full params handler
+client.subscribe('/users/:userid/message/:messageid/*', function (topic, message, context) {
   console.log('-------------------------------------------------');
-  console.log('message:', message);            // { hello: 'world' }
-  console.log('topic  :', route.topic);     // '/users/ty/message/4321/ping'
-  console.log('params :', route.params);    // { userid: 'taoyuan', messageid: 4321 }
-  console.log('slats  :', route.splats);    // [ 'ping' ]
-  console.log('path   :', route.path);      // '/users/:userid/message/:messageid/:method'
+  console.log('topic  :', topic);             // /users/taoyuan/message/4321/ping
+  console.log('message:', message);           // { hello: 'world' }
+  console.log('params :', context.params);    // { userid: 'taoyuan', messageid: 4321 }
+  console.log('slats  :', context.splats);    // [ 'ping' ]
+  console.log('path   :', context.path);      // '/users/:userid/message/:messageid/:method'
+  console.log();
+});
+
+// one context param handler
+client.subscribe('/users/:userid/message/:messageid/*', function (context) {
   console.log('-------------------------------------------------');
-  client.end();
+  console.log(context);
+  console.log();
 });
 
 client.ready(function () {
   client.publish('/users/taoyuan/message/4321/ping', {hello: 'world'});
 });
+
+setTimeout(function () { client.end(); }, 10);
