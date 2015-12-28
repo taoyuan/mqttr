@@ -46,8 +46,10 @@ client.subscribe('/users/:userid/message/:messageid/*', function (context) {
 
 client.ready(function () {
   client.publish('/users/taoyuan/message/4321/ping', {hello: 'world'});
+
+  setTimeout(function () {
+    client.end();
+  }, 10);
 });
 
-setTimeout(function () {
-  client.end();
-}, 10);
+
