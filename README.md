@@ -12,7 +12,6 @@ $ npm install --save mqttr
 ```js
 var mqttr = require('mqttr');
 
-
 // You should start a mqtt server at 1883 before or after run this script
 var client = mqttr.connect('mqtt://localhost');
 
@@ -37,26 +36,27 @@ client.on('error', function (err) {
 });
 
 // full params handler
-client.subscribe('/users/:userid/message/:messageid/*', function (topic, message, context) {
+client.subscribe('/users/:userid/message/:messageid/*', function (topic, payload, message) {
   console.log('-------------------------------------------------');
   console.log('topic  :', topic);             // /users/taoyuan/message/4321/ping
-  console.log('message:', message);           // { hello: 'world' }
-  console.log('params :', context.params);    // { userid: 'taoyuan', messageid: 4321 }
-  console.log('slats  :', context.splats);    // [ 'ping' ]
-  console.log('path   :', context.path);      // '/users/:userid/message/:messageid/:method'
-  console.log('packet :', context.packet);    // {...} packet received packet, as defined in mqtt-packet
+  console.log('message:', payload);           // { hello: 'world' }
+  console.log('params :', message.params);    // { userid: 'taoyuan', messageid: 4321 }
+  console.log('slats  :', message.splats);    // [ 'ping' ]
+  console.log('path   :', message.path);      // '/users/:userid/message/:messageid/:method'
+  console.log('packet :', message.packet);    // {...} packet received packet, as defined in mqtt-packet
   console.log();
 });
 
 // one context param handler
-client.subscribe('/users/:userid/message/:messageid/*', function (context) {
+client.subscribe('/users/:userid/message/:messageid/*', function (message) {
   console.log('-------------------------------------------------');
-  console.log(context);
+  console.log(message);
   console.log();
 });
 
 client.ready(function () {
   client.publish('/users/taoyuan/message/4321/ping', {hello: 'world'});
+
   setTimeout(function () {
     client.end();
   }, 10);

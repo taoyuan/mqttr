@@ -32,9 +32,9 @@ describe('Client', function () {
   });
 
   it('should work', function (done) {
-    client.subscribe('$hello/:name', function (topic, message, matched) {
-      t.equal(matched.params.name, 'foo');
-      t.deepEqual(message, {a: 1});
+    client.subscribe('$hello/:name', function (topic, payload, message) {
+      t.equal(message.params.name, 'foo');
+      t.deepEqual(payload, {a: 1});
       done();
     });
 
@@ -44,9 +44,9 @@ describe('Client', function () {
 
   it('should work with two clients', function (done) {
     var client2 = mqttr.connect(server.url);
-    client2.subscribe('$hello/:name', function (topic, message, matched) {
-      t.equal(matched.params.name, 'foo');
-      t.deepEqual(message, {a: 1});
+    client2.subscribe('$hello/:name', function (topic, payload, message) {
+      t.equal(message.params.name, 'foo');
+      t.deepEqual(payload, {a: 1});
       client2.end(done);
     });
 
@@ -57,8 +57,8 @@ describe('Client', function () {
 
   it('should work with char wild char', function (done) {
     var data = {boo: 'foo'};
-    client.subscribe('foo/*', function (topic, message) {
-      t.deepEqual(data, message);
+    client.subscribe('foo/*', function (topic, payload) {
+      t.deepEqual(data, payload);
       done();
     });
     client.publish('foo/bar', data);
@@ -66,8 +66,8 @@ describe('Client', function () {
 
   it('should work with params', function (done) {
     var data = {boo: 'foo'};
-    client.subscribe('foo/:bar', function (topic, message, route) {
-      t.deepEqual(data, message);
+    client.subscribe('foo/:bar', function (topic, payload, route) {
+      t.deepEqual(data, payload);
       t.equal(route.params.bar, 'bar');
       done();
     });
