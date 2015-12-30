@@ -13,7 +13,7 @@ exports.connect = function (url, options) {
     options = url;
     url = undefined;
   }
-  options = _.assign({ qos: 1 }, options);
+  options = _.assign({qos: 1}, options);
   options.codec = options.codec || 'msgpack';
 
   if (typeof options.codec === 'string') {
@@ -23,7 +23,7 @@ exports.connect = function (url, options) {
   return new exports.Client(mqtt.connect(url, options), options);
 };
 
-function cli () {
+function cli() {
   var commist = require('commist')(),
     helpMe = require('help-me')();
 
@@ -34,7 +34,7 @@ function cli () {
   });
   commist.register('help', helpMe.toStdout);
 
-  if (null !== commist.parse(process.argv.slice(2))) {
+  if (commist.parse(process.argv.slice(2)) !== null) {
     console.log('No such command:', process.argv[2], '\n');
     helpMe.toStdout();
   }

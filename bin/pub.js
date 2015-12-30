@@ -1,21 +1,24 @@
 #!/usr/bin/env node
+"use strict";
 
-var mqttr      = require('../')
-  , path      = require('path')
-  , fs        = require('fs')
-  , concat    = require('concat-stream')
-  , helpMe    = require('help-me')({
-      dir: path.join(__dirname, '..', 'doc')
-    })
-  , minimist  = require('minimist');
+var mqttr = require('../');
+var path = require('path');
+var fs = require('fs');
+var concat = require('concat-stream');
+var minimist = require('minimist');
+
+var helpMe = require('help-me')({
+  dir: path.join(__dirname, '..', 'doc')
+});
 
 function send(args) {
   var client = mqttr.connect(args);
-  client.on('connect', function() {
+  client.on('connect', function () {
     var message = args.message;
     try {
       message = JSON.parse(message);
     } catch (e) {
+      // no-op
     }
     client.publish(args.topic, message, args);
     client.end();
@@ -68,14 +71,14 @@ function start(args) {
   }
 
   if (args.key && args.cert && !args.protocol) {
-    args.protocol = 'mqtts'
+    args.protocol = 'mqtts';
   }
 
   if (!args.msgpack) {
     args.codec = 'json';
   }
 
-  if (args.port){
+  if (args.port) {
     if (typeof args.port !== 'number') {
       console.warn('# Port: number expected, \'%s\' was given.', typeof args.port);
       return;
@@ -109,7 +112,7 @@ function start(args) {
   }
 
   if (args.stdin) {
-    process.stdin.pipe(concat(function(data) {
+    process.stdin.pipe(concat(function (data) {
       args.message = data.toString().trim();
       send(args);
     }));
@@ -121,5 +124,5 @@ function start(args) {
 module.exports = start;
 
 if (require.main === module) {
-  start(process.argv.slice(2))
+  start(process.argv.slice(2));
 }

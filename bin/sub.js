@@ -1,13 +1,14 @@
 #!/usr/bin/env node
+"use strict";
 
-var mqtt      = require('../')
-  , path      = require('path')
-  , fs        = require('fs')
-  , concat    = require('concat-stream')
-  , helpMe    = require('help-me')({
-      dir: path.join(__dirname, '..', 'doc')
-    })
-  , minimist  = require('minimist');
+var mqtt = require('../');
+var path = require('path');
+var fs = require('fs');
+var minimist = require('minimist');
+
+var helpMe = require('help-me')({
+  dir: path.join(__dirname, '..', 'doc')
+});
 
 function start(args) {
   args = minimist(args, {
@@ -46,7 +47,7 @@ function start(args) {
   args.topic = args.topic || args._.shift();
 
   if (!args.topic) {
-    console.error('missing topic\n')
+    console.error('missing topic\n');
     return helpMe.toStdout('subscribe');
   }
 
@@ -74,7 +75,7 @@ function start(args) {
     args.codec = 'json';
   }
 
-  if (args.port){
+  if (args.port) {
     if (typeof args.port !== 'number') {
       console.warn('# Port: number expected, \'%s\' was given.', typeof args.port);
       return;
@@ -93,20 +94,20 @@ function start(args) {
 
   var client = mqtt.connect(args);
 
-  client.on('connect', function() {
-    client.subscribe(args.topic, function(topic, payload) {
+  client.on('connect', function () {
+    client.subscribe(args.topic, function (topic, payload) {
       if (args.verbose) {
-        console.log(topic, payload.toString())
+        console.log(topic, payload.toString());
       } else {
-        console.log(payload.toString())
+        console.log(payload.toString());
       }
-    }, { qos: args.qos }, function (err, result) {
+    }, {qos: args.qos}, function (err, result) {
       result.forEach(function (sub) {
         if (sub.qos > 2) {
           console.error('subscription negated to', sub.topic, 'with code', sub.qos);
           process.exit(1);
         }
-      })
+      });
     });
   });
 }
@@ -114,5 +115,5 @@ function start(args) {
 module.exports = start;
 
 if (require.main === module) {
-  start(process.argv.slice(2))
+  start(process.argv.slice(2));
 }
