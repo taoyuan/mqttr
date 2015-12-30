@@ -45,7 +45,7 @@ client.subscribe('/users/:userid/message/:messageid/*', function (message) {
 });
 
 client.ready(function () {
-  client.publish('/users/taoyuan/message/4321/ping', {hello: 'world'});
+  client.publish('/users/taoyuan/message/4321/ping', {hello: '中国'});
 
   setTimeout(function () {
     client.end();

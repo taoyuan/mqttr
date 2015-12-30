@@ -8,10 +8,12 @@
     "email": "towyuan@outlook.com",
     "url": ""
   },
-  "files": [
-    "lib"
-  ],
-  "main": "lib/index.js",
+  "bin": {
+    "mqttr": "./mqttr.js",
+    "mqttr_pub": "./bin/pub.js",
+    "mqttr_sub": "./bin/sub.js"
+  },
+  "main": "./mqttr.js",
   "keywords": [
     "mqtt",
     "router",
@@ -20,8 +22,11 @@
   "repository": "https://github.com/taoyuan/mqttr",
   "dependencies": {
     "async": "^1.5.0",
+    "concat-stream": "^1.5.1",
     "debug": "^2.2.0",
+    "help-me": "^0.2.0",
     "lodash": "^3.10.1",
+    "minimist": "^1.2.0",
     "mqtt": "^1.6.3",
     "msgpack5": "^3.3.0"
   },
@@ -36,7 +41,7 @@
     "gulp-nsp": "^2.1.0",
     "gulp-plumber": "^1.0.0",
     "mocha": "^2.3.4",
-    "mosca": "^0.32.1"
+    "mosca": "taoyuan/mosca"
   },
   "scripts": {
     "prepublish": "gulp prepublish",
