@@ -7,6 +7,7 @@
 $ npm install --save mqttr
 ```
 
+<a name="usage"></a>
 ## Usage
 
 ```js
@@ -63,6 +64,33 @@ client.ready(function () {
 });
 
 ```
+
+
+<a name="cli"></a>
+## Command Line Tools
+
+`mqttr` bundles a command to interact with a broker.
+In order to have it available on your path, you should install `mqttr` globally:
+
+```sh
+npm install mqttr -g
+```
+
+Then, on one terminal
+
+```
+mqttr sub -t 'hello' -h 'test.mosquitto.org' -v
+```
+
+On another
+
+```
+mqttr pub -t 'hello' -h 'test.mosquitto.org' -m 'from mqttr'
+```
+
+See `mqttr help <command>` for the command help.
+
+
 ## License
 
 MIT © [taoyuan]()
