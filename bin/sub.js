@@ -96,10 +96,14 @@ function start(args) {
 
   client.on('connect', function () {
     client.subscribe(args.topic, function (topic, payload) {
+      if (Buffer.isBuffer(payload)) {
+        payload = payload.toString();
+      }
+
       if (args.verbose) {
-        console.log(topic, payload.toString());
+        console.log('[' + topic + ']', payload);
       } else {
-        console.log(payload.toString());
+        console.log(payload);
       }
     }, {qos: args.qos}, function (err, result) {
       result.forEach(function (sub) {
