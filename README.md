@@ -93,7 +93,7 @@ See `mqttr help <command>` for the command help.
 
 ## License
 
-MIT © [taoyuan]()
+MIT © [taoyuan](towyuan#outlook.com)
 
 
 [npm-image]: https://badge.fury.io/js/mqttr.svg

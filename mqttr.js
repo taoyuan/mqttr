@@ -18,7 +18,7 @@ exports.connect = function (url, options) {
 
   if (typeof options.codec === 'string') {
     if (!exports.codec[options.codec]) throw new Error('Unknown codec: ' + options.codec);
-    options.codec = exports.codec[options.codec]();
+    options.codec = exports.codec[options.codec](options);
   }
   return new exports.Client(mqtt.connect(url, options), options);
 };
