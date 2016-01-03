@@ -58,10 +58,21 @@ describe('Client', function () {
   it('should work with char wild char', function (done) {
     var data = {boo: 'foo'};
     client.subscribe('foo/*', function (topic, payload) {
+      t.equal('foo/bar', topic);
       t.deepEqual(data, payload);
       done();
     });
     client.publish('foo/bar', data);
+  });
+
+  it('should work with two char wild char', function (done) {
+    var data = {boo: 'foo'};
+    client.subscribe('foo/**', function (topic, payload) {
+      t.equal('foo/bar/hello', topic);
+      t.deepEqual(data, payload);
+      done();
+    });
+    client.publish('foo/bar/hello', data);
   });
 
   it('should work with params', function (done) {
