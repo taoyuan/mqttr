@@ -86,7 +86,20 @@ describe('Client', function () {
     client.publish('$hello/foo', {a: 1});
 
     setTimeout(done, 500);
+  });
 
+  it('should support custom log', function (done) {
+    var messages = [];
+    var log = {
+      debug: function (msg) {
+        messages.push(msg);
+      }
+    };
+    var c = mqttr.connect(server.url, {log: log});
+    c.end(function () {
+      t.isAbove(messages.length, 0);
+      done();
+    });
   });
 
 });
