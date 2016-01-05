@@ -21,7 +21,7 @@
   ],
   "repository": "https://github.com/taoyuan/mqttr",
   "dependencies": {
-    "async": "^1.5.0",
+    "async": "^1.5.1",
     "concat-stream": "^1.5.1",
     "debug": "^2.2.0",
     "help-me": "^0.2.0",
@@ -32,14 +32,14 @@
   },
   "devDependencies": {
     "chai": "^3.4.1",
-    "gulp": "^3.6.0",
-    "gulp-coveralls": "^0.1.0",
-    "gulp-eslint": "^1.0.0",
+    "gulp": "^3.9.0",
+    "gulp-coveralls": "^0.1.4",
+    "gulp-eslint": "^1.1.1",
     "gulp-exclude-gitignore": "^1.0.0",
-    "gulp-istanbul": "^0.9.0",
-    "gulp-mocha": "^2.0.0",
-    "gulp-nsp": "^2.1.0",
-    "gulp-plumber": "^1.0.0",
+    "gulp-istanbul": "^0.10.3",
+    "gulp-mocha": "^2.2.0",
+    "gulp-nsp": "^2.2.1",
+    "gulp-plumber": "^1.0.1",
     "mocha": "^2.3.4",
     "mosca": "taoyuan/mosca"
   },
@@ -47,5 +47,8 @@
     "prepublish": "gulp prepublish",
     "test": "gulp"
   },
-  "license": "MIT"
+  "license": "MIT",
+  "optionalDependencies": {
+    "ws": "^1.0.1"
+  }
 }
