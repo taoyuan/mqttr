@@ -1,10 +1,11 @@
 #!/usr/bin/env node
 "use strict";
 
-var mqtt = require('../');
+var util = require('util');
 var path = require('path');
 var fs = require('fs');
 var minimist = require('minimist');
+var mqtt = require('../');
 
 var helpMe = require('help-me')({
   dir: path.join(__dirname, '..', 'doc')
@@ -101,7 +102,7 @@ function start(args) {
       }
 
       if (args.verbose) {
-        console.log('[' + topic + ']', payload);
+        console.log('[' + topic + ']', util.inspect(payload, {colors: true, depth: 99}));
       } else {
         console.log(payload);
       }

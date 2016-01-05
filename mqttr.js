@@ -14,7 +14,7 @@ exports.connect = function (url, options) {
     url = undefined;
   }
   options = _.assign({qos: 1}, options);
-  options.codec = options.codec || 'msgpack';
+  options.codec = options.codec || 'json';
 
   if (typeof options.codec === 'string') {
     if (!exports.codec[options.codec]) throw new Error('Unknown codec: ' + options.codec);
