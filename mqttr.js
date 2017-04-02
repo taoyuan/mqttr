@@ -1,8 +1,7 @@
 #!/usr/bin/env node
-'use strict';
 
-var _ = require('lodash');
-var mqtt = require('mqtt');
+const _ = require('lodash');
+const mqtt = require('mqtt');
 
 exports.codec = require('./lib/codec');
 exports.Client = require('./lib/client');
@@ -24,7 +23,7 @@ exports.connect = function (url, options) {
 };
 
 function cli() {
-  var commist = require('commist')(),
+  const commist = require('commist')(),
     helpMe = require('help-me')();
 
   commist.register('publish', require('./bin/pub'));

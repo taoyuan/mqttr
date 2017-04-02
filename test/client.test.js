@@ -1,12 +1,12 @@
 'use strict';
 
-var t = require('chai').assert;
-var s = require('./support');
-var mqttr = require('../');
+const t = require('chai').assert;
+const s = require('./support');
+const mqttr = require('../');
 
 describe('Client', function () {
 
-  var server, client;
+  let server, client;
 
   before(function (done) {
     s.createMqttServer({logger: {level: 'error'}}, function (err, _server) {
@@ -43,7 +43,7 @@ describe('Client', function () {
   });
 
   it('should work with two clients', function (done) {
-    var client2 = mqttr.connect(server.url);
+    const client2 = mqttr.connect(server.url);
     client2.subscribe('$hello/:name', function (topic, payload, message) {
       t.equal(message.params.name, 'foo');
       t.deepEqual(payload, {a: 1});
@@ -56,7 +56,7 @@ describe('Client', function () {
   });
 
   it('should work with char wild char', function (done) {
-    var data = {boo: 'foo'};
+    const data = {boo: 'foo'};
     client.subscribe('foo/*', function (topic, payload) {
       t.equal('foo/bar', topic);
       t.deepEqual(data, payload);
@@ -66,7 +66,7 @@ describe('Client', function () {
   });
 
   it('should work with two char wild char', function (done) {
-    var data = {boo: 'foo'};
+    const data = {boo: 'foo'};
     client.subscribe('foo/**', function (topic, payload) {
       t.equal('foo/bar/hello', topic);
       t.deepEqual(data, payload);
@@ -76,7 +76,7 @@ describe('Client', function () {
   });
 
   it('should work with params', function (done) {
-    var data = {boo: 'foo'};
+    const data = {boo: 'foo'};
     client.subscribe('foo/:bar', function (topic, payload, route) {
       t.deepEqual(data, payload);
       t.equal(route.params.bar, 'bar');
@@ -86,8 +86,8 @@ describe('Client', function () {
   });
 
   it('should not received data when subscription cancelled', function (done) {
-    var i = 0;
-    var sub = client.subscribe('$hello/:name', function () {
+    let i = 0;
+    const sub = client.subscribe('$hello/:name', function () {
       if (i === 0) return ++i;
       t.fail('Should not run here');
     });
@@ -100,13 +100,13 @@ describe('Client', function () {
   });
 
   it('should support custom log', function (done) {
-    var messages = [];
-    var log = {
+    const messages = [];
+    const log = {
       debug: function (msg) {
         messages.push(msg);
       }
     };
-    var c = mqttr.connect(server.url, {log: log});
+    const c = mqttr.connect(server.url, {log: log});
     c.end(function () {
       t.isAbove(messages.length, 0);
       done();
