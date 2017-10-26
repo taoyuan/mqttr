@@ -1,6 +1,6 @@
 'use strict';
 
-const t = require('chai').assert;
+const assert = require('chai').assert;
 const s = require('./support');
 const mqttr = require('../');
 
@@ -33,8 +33,8 @@ describe('Client', function () {
 
   it('should work', function (done) {
     client.subscribe('$hello/:name', function (topic, payload, message) {
-      t.equal(message.params.name, 'foo');
-      t.deepEqual(payload, {a: 1});
+      assert.equal(message.params.name, 'foo');
+      assert.deepEqual(payload, {a: 1});
       done();
     });
 
@@ -45,8 +45,8 @@ describe('Client', function () {
   it('should work with two clients', function (done) {
     const client2 = mqttr.connect(server.url);
     client2.subscribe('$hello/:name', function (topic, payload, message) {
-      t.equal(message.params.name, 'foo');
-      t.deepEqual(payload, {a: 1});
+      assert.equal(message.params.name, 'foo');
+      assert.deepEqual(payload, {a: 1});
       client2.end(done);
     });
 
@@ -58,8 +58,8 @@ describe('Client', function () {
   it('should work with char wild char', function (done) {
     const data = {boo: 'foo'};
     client.subscribe('foo/*', function (topic, payload) {
-      t.equal('foo/bar', topic);
-      t.deepEqual(data, payload);
+      assert.equal('foo/bar', topic);
+      assert.deepEqual(data, payload);
       done();
     });
     client.publish('foo/bar', data);
@@ -68,8 +68,8 @@ describe('Client', function () {
   it('should work with two char wild char', function (done) {
     const data = {boo: 'foo'};
     client.subscribe('foo/**', function (topic, payload) {
-      t.equal('foo/bar/hello', topic);
-      t.deepEqual(data, payload);
+      assert.equal('foo/bar/hello', topic);
+      assert.deepEqual(data, payload);
       done();
     });
     client.publish('foo/bar/hello', data);
@@ -78,8 +78,8 @@ describe('Client', function () {
   it('should work with params', function (done) {
     const data = {boo: 'foo'};
     client.subscribe('foo/:bar', function (topic, payload, route) {
-      t.deepEqual(data, payload);
-      t.equal(route.params.bar, 'bar');
+      assert.deepEqual(data, payload);
+      assert.equal(route.params.bar, 'bar');
       done();
     });
     client.publish('foo/bar', data);
@@ -89,14 +89,14 @@ describe('Client', function () {
     let i = 0;
     const sub = client.subscribe('$hello/:name', function () {
       if (i === 0) return ++i;
-      t.fail('Should not run here');
+      assert.fail('Should not run here');
     });
 
     client.publish('$hello/foo', {a: 1});
     sub.cancel();
     client.publish('$hello/foo', {a: 1});
 
-    setTimeout(done, 500);
+    setTimeout(() => done(), 500);
   });
 
   it('should support custom log', function (done) {
@@ -108,9 +108,30 @@ describe('Client', function () {
     };
     const c = mqttr.connect(server.url, {log: log});
     c.end(function () {
-      t.isAbove(messages.length, 0);
+      assert.isAbove(messages.length, 0);
       done();
     });
   });
+
+	it('should match the matched topic', function (done) {
+		let catched = false;
+		const data = {boo: 'foo'};
+
+		client.subscribe('foo/should_not_match/:bar', function (topic, payload, route) {
+			assert.fail('should not enter here');
+			done();
+		});
+
+		client.subscribe('foo/:bar', function (topic, payload, route) {
+			assert.deepEqual(data, payload);
+			assert.equal(route.params.bar, 'bar');
+			catched = true
+		});
+		client.publish('foo/bar', data);
+		setTimeout(() => {
+			assert.ok(catched);
+			done();
+		}, 500);
+	});
 
 });
