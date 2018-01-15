@@ -33,10 +33,10 @@
     "lodash": "^4.17.4",
     "minimist": "^1.2.0",
     "mqtt": "^2.15.1",
-    "msgpack5": "^4.0.0"
+    "msgpack5": "^4.0.1"
   },
   "devDependencies": {
-    "@types/async": "^2.0.46",
+    "@types/async": "^2.0.47",
     "@types/chai": "^4.1.0",
     "@types/mocha": "^2.2.46",
     "chai": "^4.1.2",
