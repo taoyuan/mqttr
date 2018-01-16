@@ -25,7 +25,7 @@ function getPort(cb) {
   });
 }
 
-exports.createMqttServer = function (settings, cb) {
+exports.createMQTTServer = function (settings, cb) {
   if (typeof settings === 'function') {
     cb = settings;
     settings = undefined;

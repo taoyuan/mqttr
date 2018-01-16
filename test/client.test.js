@@ -2,14 +2,14 @@
 
 const assert = require('chai').assert;
 const s = require('./support');
-const mqttr = require('../');
+const mqttr = require('..');
 
 describe('Client', function () {
 
   let server, client;
 
   before(function (done) {
-    s.createMqttServer({logger: {level: 'error'}}, function (err, _server) {
+    s.createMQTTServer({logger: {level: 'error'}}, function (err, _server) {
       if (err) throw err;
       server = _server;
       done();
