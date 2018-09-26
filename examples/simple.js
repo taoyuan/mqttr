@@ -1,9 +1,9 @@
 "use strict";
 
-var mqttr = require('../');
+const mqttr = require('../');
 
 // You should start a mqtt server at 1883 before or after run this script
-var client = mqttr.connect('mqtt://localhost');
+const client = mqttr.connect('mqtt://localhost');
 
 client.on('connect', function () {
   console.log('connect');
