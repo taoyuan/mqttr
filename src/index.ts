@@ -6,6 +6,7 @@ import {Codec} from "./codec";
 export const codec = require('./codec');
 export * from "./router";
 export * from "./client";
+export * from "./subscription";
 
 export interface ConnectOptions extends IClientOptions {
 	codec?: string | Codec;

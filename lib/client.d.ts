@@ -3,6 +3,7 @@ import { ClientSubscribeCallback, IClientSubscribeOptions, MqttClient } from "mq
 import { Codec } from "./codec";
 import { EventEmitter } from 'events';
 import { Router } from './router';
+import { Subscription } from './subscription';
 export interface LogFn {
     (...args: any[]): void;
 }
@@ -44,8 +45,8 @@ export declare class Client extends EventEmitter {
     _unsubscribe(topic: any, cb: any): void;
     _handleMessage(topic: string, payload: any, packet: any): void;
     ready(cb: any): this | undefined;
-    subscribe(topic: string, handler: SubscribeHandler, cb?: ClientSubscribeCallback): any;
-    subscribe(topic: string, handler: SubscribeHandler, options: IClientSubscribeOptions, cb?: ClientSubscribeCallback): any;
+    subscribe(topic: string, handler: SubscribeHandler, cb?: ClientSubscribeCallback): Subscription;
+    subscribe(topic: string, handler: SubscribeHandler, options: IClientSubscribeOptions, cb?: ClientSubscribeCallback): Subscription;
     publish(topic: any, message: any, options: any, cb: any): void;
     end(force: any, cb: any): void;
 }

@@ -179,9 +179,9 @@ export class Client extends EventEmitter {
 		}
 	}
 
-	subscribe(topic: string, handler: SubscribeHandler, cb?: ClientSubscribeCallback);
-	subscribe(topic: string, handler: SubscribeHandler, options: IClientSubscribeOptions, cb?: ClientSubscribeCallback);
-	subscribe(topic: string, handler: SubscribeHandler, options?: IClientSubscribeOptions | ClientSubscribeCallback, cb?: ClientSubscribeCallback) {
+	subscribe(topic: string, handler: SubscribeHandler, cb?: ClientSubscribeCallback): Subscription;
+	subscribe(topic: string, handler: SubscribeHandler, options: IClientSubscribeOptions, cb?: ClientSubscribeCallback): Subscription;
+	subscribe(topic: string, handler: SubscribeHandler, options?: IClientSubscribeOptions | ClientSubscribeCallback, cb?: ClientSubscribeCallback): Subscription {
 		const sub = new Subscription(this, topic, handler);
 		if (this.connected) {
 			this._subscribe(topic, options, cb);

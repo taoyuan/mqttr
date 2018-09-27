@@ -3,6 +3,7 @@ import { Codec } from "./codec";
 export declare const codec: any;
 export * from "./router";
 export * from "./client";
+export * from "./subscription";
 export interface ConnectOptions extends IClientOptions {
     codec?: string | Codec;
 }
