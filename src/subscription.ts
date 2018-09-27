@@ -1,4 +1,5 @@
 import {Client} from "./client";
+import {createPromiseCallback, PromiseCallback} from "./utils";
 
 export class Subscription {
 	public client: Client;
@@ -15,10 +16,16 @@ export class Subscription {
 		this.client.router.add(topic, this);
 	}
 
-	cancel(cb) {
-		if (this.cancelled) return;
+	cancel(cb?: (() => void) | PromiseCallback): Promise<any> | undefined {
+		cb = cb || createPromiseCallback();
+		if (this.cancelled) {
+			// @ts-ignore
+			return cb();
+		}
 		this.cancelled = true;
 		this.client.router.remove(this.topic, this);
 		this.client._unsubscribe(this.topic, cb);
+		// @ts-ignore
+		return cb.promise;
 	}
 }
