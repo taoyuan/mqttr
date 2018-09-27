@@ -12,9 +12,9 @@ export interface ConnectOptions extends IClientOptions {
 	codec?: string | Codec;
 }
 
-export function connect(opts?: ConnectOptions);
-export function connect(url?: string, opts?: ConnectOptions);
-export function connect (url?: string | ConnectOptions, opts?: ConnectOptions) {
+export function connect(opts?: ConnectOptions): Client;
+export function connect(url?: string, opts?: ConnectOptions): Client;
+export function connect (url?: string | ConnectOptions, opts?: ConnectOptions): Client {
 	if (typeof url === 'object') {
 		opts = url;
 		url = undefined;

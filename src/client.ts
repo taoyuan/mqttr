@@ -189,11 +189,11 @@ export class Client extends EventEmitter {
 		return sub;
 	}
 
-	publish(topic, message, options, cb) {
+	publish(topic, message, options?, cb?) {
 		this.mqttclient.publish(mqttTopic(topic), this.codec.encode(message), options, cb);
 	}
 
-	end(force, cb) {
+	end(force?, cb?) {
 		this.mqttclient.end(force, cb);
 	}
 }

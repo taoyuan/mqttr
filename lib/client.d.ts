@@ -47,6 +47,6 @@ export declare class Client extends EventEmitter {
     ready(cb: any): this | undefined;
     subscribe(topic: string, handler: SubscribeHandler, cb?: ClientSubscribeCallback): Subscription;
     subscribe(topic: string, handler: SubscribeHandler, options: IClientSubscribeOptions, cb?: ClientSubscribeCallback): Subscription;
-    publish(topic: any, message: any, options: any, cb: any): void;
-    end(force: any, cb: any): void;
+    publish(topic: any, message: any, options?: any, cb?: any): void;
+    end(force?: any, cb?: any): void;
 }
