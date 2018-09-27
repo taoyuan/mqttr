@@ -1,9 +1,9 @@
-import { Client, SubscribeHandler } from "./client";
+import { Client } from "./client";
 export declare class Subscription {
     client: Client;
     cancelled: boolean;
     topic: string;
-    handler: SubscribeHandler;
-    constructor(client: Client, topic: string, handler: SubscribeHandler);
+    handler: Function;
+    constructor(client: Client, topic: string, handler: Function);
     cancel(cb: any): void;
 }

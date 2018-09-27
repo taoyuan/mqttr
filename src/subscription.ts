@@ -1,12 +1,12 @@
-import {Client, SubscribeHandler} from "./client";
+import {Client} from "./client";
 
 export class Subscription {
 	public client: Client;
 	public cancelled: boolean;
 	public topic: string;
-	public handler: SubscribeHandler;
+	public handler: Function;
 
-	constructor(client: Client, topic: string, handler: SubscribeHandler) {
+	constructor(client: Client, topic: string, handler: Function) {
 		this.client = client;
 		this.cancelled = false;
 		this.topic = topic;

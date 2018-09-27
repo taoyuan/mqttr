@@ -32,10 +32,15 @@ export interface Message {
 	packet: any;
 }
 
-export interface SubscribeHandler {
+export interface StandardSubHandler {
 	(message: Message): void;
-	(topic: string, payload: any, message: Message): void;
 }
+
+export interface ExpandedSubHandler {
+	(topic: string, payload: any, message?: Message): void;
+}
+
+export type SubHandler = StandardSubHandler | ExpandedSubHandler;
 
 const levels = ['trace', 'debug', 'info', 'warn', 'error', 'fatal'];
 
@@ -179,9 +184,9 @@ export class Client extends EventEmitter {
 		}
 	}
 
-	subscribe(topic: string, handler: SubscribeHandler, cb?: ClientSubscribeCallback): Subscription;
-	subscribe(topic: string, handler: SubscribeHandler, options: IClientSubscribeOptions, cb?: ClientSubscribeCallback): Subscription;
-	subscribe(topic: string, handler: SubscribeHandler, options?: IClientSubscribeOptions | ClientSubscribeCallback, cb?: ClientSubscribeCallback): Subscription {
+	subscribe(topic: string, handler: SubHandler, cb?: ClientSubscribeCallback): Subscription;
+	subscribe(topic: string, handler: SubHandler, options: IClientSubscribeOptions, cb?: ClientSubscribeCallback): Subscription;
+	subscribe(topic: string, handler: SubHandler, options?: IClientSubscribeOptions | ClientSubscribeCallback, cb?: ClientSubscribeCallback): Subscription {
 		const sub = new Subscription(this, topic, handler);
 		if (this.connected) {
 			this._subscribe(topic, options, cb);

@@ -29,10 +29,13 @@ export interface Message {
     path: string;
     packet: any;
 }
-export interface SubscribeHandler {
+export interface StandardSubHandler {
     (message: Message): void;
-    (topic: string, payload: any, message: Message): void;
 }
+export interface ExpandedSubHandler {
+    (topic: string, payload: any, message?: Message): void;
+}
+export declare type SubHandler = StandardSubHandler | ExpandedSubHandler;
 export declare class Client extends EventEmitter {
     mqttclient: MqttClient;
     codec: Codec;
@@ -45,8 +48,8 @@ export declare class Client extends EventEmitter {
     _unsubscribe(topic: any, cb: any): void;
     _handleMessage(topic: string, payload: any, packet: any): void;
     ready(cb: any): this | undefined;
-    subscribe(topic: string, handler: SubscribeHandler, cb?: ClientSubscribeCallback): Subscription;
-    subscribe(topic: string, handler: SubscribeHandler, options: IClientSubscribeOptions, cb?: ClientSubscribeCallback): Subscription;
+    subscribe(topic: string, handler: SubHandler, cb?: ClientSubscribeCallback): Subscription;
+    subscribe(topic: string, handler: SubHandler, options: IClientSubscribeOptions, cb?: ClientSubscribeCallback): Subscription;
     publish(topic: any, message: any, options?: any, cb?: any): void;
     end(force?: any, cb?: any): void;
 }
