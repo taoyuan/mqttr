@@ -115,6 +115,18 @@ export class Client extends EventEmitter {
 		return this.mqttclient.connected;
 	}
 
+	get disconnecting() {
+		return this.mqttclient.disconnecting
+	}
+
+	get disconnected() {
+		return this.mqttclient.disconnected;
+	}
+
+	get reconnecting() {
+		return this.mqttclient.reconnecting;
+	}
+
 	async _connected() {
 		for (const route of this.router.routes) {
 			await PromiseA.fromCallback(cb => this._subscribe(route.path, cb));

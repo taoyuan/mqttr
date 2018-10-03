@@ -43,6 +43,9 @@ export declare class Client extends EventEmitter {
     router: Router;
     constructor(mqttclient: MqttClient, options?: ClientOptions, log?: any);
     readonly connected: boolean;
+    readonly disconnecting: boolean;
+    readonly disconnected: boolean;
+    readonly reconnecting: boolean;
     _connected(): Promise<void>;
     _subscribe(topic: string, options?: IClientSubscribeOptions | ClientSubscribeCallback, cb?: ClientSubscribeCallback): void;
     _unsubscribe(topic: any, cb: any): void;
