@@ -47,7 +47,8 @@
     "async-mqtt": "^2.6.1",
     "debug": "^4.1.1",
     "msgpack5": "^4.2.1",
-    "path-to-regexp": "^6.1.0"
+    "path-to-regexp": "^6.1.0",
+    "tslib": "^2.0.0"
   },
   "devDependencies": {
     "@tib/build": "^6.3.0",
