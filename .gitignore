@@ -1,6 +1,13 @@
-node_modules
-coverage
 .idea
+node_modules
+npm-debug.log
+.DS_Store
+coverage
 .nyc_output
-examples
-lib
+*.tgz
+.sandbox
+*.tsbuildinfo
+dist
+
+# ESLint cache
+.eslintcache

@@ -1,6 +1,6 @@
 {
   "name": "mqttr",
-  "version": "2.0.7",
+  "version": "3.0.0-alpha.0",
   "description": "A routable mqtt library based on mqtt.js",
   "homepage": "https://github.com/taoyuan/mqttr",
   "author": {
@@ -8,11 +8,8 @@
     "email": "towyuan@outlook.com",
     "url": "https://github.com/taoyuan"
   },
-  "files": [
-    "lib"
-  ],
-  "main": "./lib/index.js",
-  "types": "./lib/index.d.ts",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "keywords": [
     "mqtt",
     "router",
@@ -20,41 +17,70 @@
   ],
   "repository": "https://github.com/taoyuan/mqttr",
   "scripts": {
-    "clean": "rimraf lib",
-    "build": "npm run clean && echo Using TypeScript && tsc --version && tsc --pretty",
-    "test": "nyc mocha test/**/*.test.js",
-    "coverage": "nyc report --reporter=text-lcov | coveralls"
+    "prerelease": "cross-env CI=1 npm run test",
+    "release": "np",
+    "build": "tib-tsc",
+    "build:full": "npm ci --ignore-scripts && npm run clean && npm run build",
+    "coverage:ci": "tib-nyc report --reporter=text-lcov | coveralls",
+    "precoverage": "npm test",
+    "coverage": "tib-nyc report --reporter=text-summary",
+    "lint": "npm run prettier:check && npm run eslint",
+    "lint:fix": "npm run eslint:fix && npm run prettier:fix",
+    "eslint": "tib-eslint --report-unused-disable-directives --cache .",
+    "eslint:fix": "npm run eslint -- --fix",
+    "prettier:cli": "tib-prettier \"**/*.ts\" \"**/*.js\" \"**/*.md\"",
+    "prettier:check": "npm run prettier:cli -- --check",
+    "prettier:fix": "npm run prettier:cli -- --write",
+    "format": "npm run prettier:fix",
+    "clean": "tib-clean dist coverage .nyc_output *.tsbuildinfo",
+    "pretest": "npm run clean && npm run format",
+    "test": "tib-nyc npm run mocha",
+    "test:ci": "tib-nyc npm run mocha",
+    "posttest": "npm run lint",
+    "premocha": "npm run build",
+    "mocha": "tib-mocha \"dist/__tests__/**/*.js\"",
+    "preunit": "npm run build",
+    "unit": "tib-mocha \"dist/__tests__/unit/**/*.js\"",
+    "tsnode": "ts-node"
   },
   "dependencies": {
-    "bluebird": "^3.5.2",
-    "debug": "^4.0.1",
-    "mqtt": "^2.18.8",
-    "msgpack5": "^4.2.1"
+    "async-mqtt": "^2.6.1",
+    "debug": "^4.1.1",
+    "msgpack5": "^4.2.1",
+    "path-to-regexp": "^6.1.0"
   },
   "devDependencies": {
-    "@types/async": "^2.0.49",
-    "@types/chai": "^4.1.5",
-    "@types/mocha": "^5.2.5",
+    "@tib/build": "^6.3.0",
+    "@tib/eslint-config": "^8.2.0",
+    "@tib/testlab": "^3.4.0",
+    "@types/async": "^3.2.3",
+    "@types/mocha": "^8.0.0",
     "@types/mqtt": "^2.5.0",
     "@types/msgpack5": "^3.4.1",
-    "@types/node": "^10.11.0",
-    "chai": "^4.2.0",
-    "coveralls": "^3.0.2",
-    "mocha": "^5.2.0",
-    "mosca": "^2.8.3",
-    "nyc": "^13.0.1",
-    "rimraf": "^2.6.2",
-    "ts-node": "^7.0.1",
-    "typescript": "^3.0.3"
+    "@types/node": "^14.0.26",
+    "aedes": "^0.42.5",
+    "coveralls": "^3.1.0",
+    "cross-env": "^7.0.2",
+    "get-port": "^5.1.1",
+    "mocha": "^8.0.1",
+    "np": "^6.3.2",
+    "nyc": "^15.1.0",
+    "rimraf": "^3.0.2",
+    "ts-node": "^8.10.2",
+    "typescript": "^3.9.7"
   },
   "optionalDependencies": {
-    "ws": "^6.0.0"
+    "ws": "^7.3.1"
   },
   "license": "MIT",
-  "nyc": {
-    "reporter": [
-      "lcov",
-      "text"
-    ]
+  "files": [
+    "README.md",
+    "dist",
+    "src",
+    "!*/__tests__"
+  ],
+  "publishConfig": {
+    "registry": "https://registry.npmjs.com/",
+    "access": "public"
   }
 }
