@@ -1,7 +1,7 @@
 import {IClientOptions} from 'mqtt';
+import * as mqtt from 'async-mqtt';
 import {Codec} from './types';
 import {Client, ClientOptions} from './client';
-import * as mqtt from 'async-mqtt';
 
 export interface ConnectOptions extends IClientOptions {
   codec?: Codec;
