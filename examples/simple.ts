@@ -1,21 +1,4 @@
-# mqttr
-
-[![NPM version][npm-image]][npm-url] [![Build Status][travis-image]][travis-url]
-[![Dependency Status][daviddm-image]][daviddm-url]
-[![Coverage percentage][coveralls-image]][coveralls-url]
-
-> A routable mqtt library based on mqtt.js
-
-## Installation
-
-```sh
-$ npm i mqttr
-```
-
-## Usage
-
-```typescript
-import {connect, Message} from 'mqttr';
+import {connect, Message} from '..';
 
 // eslint-disable-next-line  @typescript-eslint/no-floating-promises
 (async () => {
@@ -74,21 +57,3 @@ import {connect, Message} from 'mqttr';
   // eslint-disable-next-line @typescript-eslint/no-misused-promises
   setTimeout(() => client.end(true), 10);
 })();
-```
-
-## Topic Patterns
-
-See [path-to-regexp](https://github.com/pillarjs/path-to-regexp)
-
-## License
-
-MIT © [taoyuan](towyuan#outlook.com)
-
-[npm-image]: https://badge.fury.io/js/mqttr.svg
-[npm-url]: https://npmjs.org/package/mqttr
-[travis-image]: https://travis-ci.org/taoyuan/mqttr.svg?branch=master
-[travis-url]: https://travis-ci.org/taoyuan/mqttr
-[daviddm-image]: https://david-dm.org/taoyuan/mqttr.svg?theme=shields.io
-[daviddm-url]: https://david-dm.org/taoyuan/mqttr
-[coveralls-image]: https://coveralls.io/repos/taoyuan/mqttr/badge.svg
-[coveralls-url]: https://coveralls.io/r/taoyuan/mqttr

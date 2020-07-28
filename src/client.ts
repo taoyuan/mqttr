@@ -1,222 +1,234 @@
-import PromiseA = require('bluebird');
-import {ClientSubscribeCallback, IClientSubscribeOptions, MqttClient} from "mqtt";
-import {Codec, msgpack} from "./codec";
 import {EventEmitter} from 'events';
+import {AsyncMqttClient, IClientSubscribeOptions} from 'async-mqtt';
+import {IClientPublishOptions, ISubscriptionGrant} from 'mqtt';
+import {Packet} from 'mqtt-packet';
+import {Codec} from './types';
 import {Matched, Router} from './router';
 import {Subscription} from './subscription';
+import {AsyncOrSync} from './types';
+import {JsonCodec} from './codecs/json';
 
-export interface LogFn {
-	(...args): void;
-}
-
-export interface Logger {
-	trace: LogFn;
-	debug: LogFn;
-	info: LogFn;
-	warn: LogFn;
-	error: LogFn;
-	fatal: LogFn;
-}
+const debug = require('debug')('mqttr:client');
 
 export interface ClientOptions {
-	codec?: Codec;
-	log: any;
+  codec?: Codec;
+  log: any;
 }
 
 export interface Message {
-	topic: string;
-	payload: any;
-	params: {[name: string]: string};
-	splats: string[];
-	path: string;
-	packet: any;
+  topic: string;
+  payload: any;
+  params: Record<string, any>;
+  splats: string[];
+  path: string;
+  packet: any;
 }
 
-export interface StandardSubHandler {
-	(message: Message): void;
-}
-
-export interface ExpandedSubHandler {
-	(topic: string, payload: any, message?: Message): void;
-}
-
+export type StandardSubHandler = (message: Message) => AsyncOrSync<any>;
+export type ExpandedSubHandler = (
+  topic: string,
+  payload: any,
+  message?: Message,
+) => AsyncOrSync<any>;
 export type SubHandler = StandardSubHandler | ExpandedSubHandler;
 
-const levels = ['trace', 'debug', 'info', 'warn', 'error', 'fatal'];
-
-function createLogger(category): Logger {
-	const debug = require('debug')(category);
-	const logger = {};
-	levels.forEach(level => {
-		logger[level] = function (...args) {
-			debug('[' + level + '] ', ...args);
-		};
-	});
-	return <Logger>logger;
-}
+export type OnConnectCallback = (packet: Packet) => void;
+export type OnMessageCallback = (
+  topic: string,
+  payload: Buffer,
+  packet: Packet,
+) => void;
+export type OnErrorCallback = (error: Error) => void;
+export type OnReconnect = () => void;
+export type OnOffline = () => void;
+export type OnClose = () => void;
 
 export class Client extends EventEmitter {
-	public mqttclient: MqttClient;
-	public codec: Codec;
-	public log: Logger;
-	public router: Router;
+  public _client: AsyncMqttClient;
+  public codec: Codec;
+  public router: Router;
 
-	constructor(mqttclient: MqttClient, options?: ClientOptions, log?) {
-		super();
+  constructor(client: AsyncMqttClient, options?: ClientOptions) {
+    super();
 
-		options = options || <ClientOptions>{};
+    options = options ?? <ClientOptions>{};
 
-		this.mqttclient = mqttclient;
-		this.codec = options.codec || msgpack();
-		this.log = log = log || options.log || createLogger('mqttr');
+    this._client = client;
+    this.codec = options.codec ?? new JsonCodec();
 
-		log.debug('Using codec:', this.codec.name);
+    debug('Using codec:', this.codec.name);
 
-		this.router = new Router();
+    this.router = new Router();
 
-		const that = this;
-		mqttclient.on('connect', (connack) => {
-			log.debug('connected');
-			that._connected();
-			that.emit('connect', connack);
-		});
+    // eslint-disable-next-line @typescript-eslint/no-misused-promises
+    client.on('connect', async packet => {
+      debug('connected');
+      await this._connected();
+      this.emit('connect', packet);
+    });
 
-		mqttclient.on('reconnect', () => {
-			log.debug('reconnect');
-			that.emit('reconnect');
-		});
+    client.on('reconnect', () => {
+      debug('reconnect');
+      this.emit('reconnect');
+    });
 
-		mqttclient.on('close', () => {
-			log.debug('close');
-			that.emit('close');
-		});
+    client.on('close', () => {
+      debug('close');
+      this.emit('close');
+    });
 
-		mqttclient.on('offline', () => {
-			log.debug('offline');
-			that.emit('offline');
-		});
+    client.on('offline', () => {
+      debug('offline');
+      this.emit('offline');
+    });
 
-		mqttclient.on('error', (error) => {
-			that.emit('error', error);
-		});
+    client.on('error', error => {
+      this.emit('error', error);
+    });
 
-		mqttclient.on('message', (topic, payload, packet) => {
-			// Try decode
-			try {
-				payload = that.codec.decode(payload);
-			} catch (e) { // Using origin payload if failed
-				// no-op
-			}
-			that._handleMessage(topic, payload, packet);
-		});
-	}
+    // eslint-disable-next-line @typescript-eslint/no-misused-promises
+    client.on('message', async (topic, payload, packet) => {
+      // Try decode
+      try {
+        payload = this.codec.decode(payload);
+      } catch (e) {
+        // Using origin payload if failed
+        // no-op
+      }
+      try {
+        await this._handleMessage(topic, payload, packet);
+      } catch (e) {
+        this.emit('error', e);
+      }
+    });
+  }
 
-	get connected() {
-		return this.mqttclient.connected;
-	}
+  get connected() {
+    return this._client.connected;
+  }
 
-	get disconnecting() {
-		return this.mqttclient.disconnecting
-	}
+  get disconnecting() {
+    return this._client.disconnecting;
+  }
 
-	get disconnected() {
-		return this.mqttclient.disconnected;
-	}
+  get disconnected() {
+    return this._client.disconnected;
+  }
 
-	get reconnecting() {
-		return this.mqttclient.reconnecting;
-	}
+  get reconnecting() {
+    return this._client.reconnecting;
+  }
 
-	async _connected() {
-		for (const route of this.router.routes) {
-			await PromiseA.fromCallback(cb => this._subscribe(route.path, cb));
-		}
+  public on(event: 'connect', cb: OnConnectCallback): this;
+  public on(event: 'reconnect', cb: OnReconnect): this;
+  public on(event: 'offline', cb: OnOffline): this;
+  public on(event: 'close', cb: OnClose): this;
+  public on(event: 'message', cb: OnMessageCallback): this;
+  public on(event: 'error', cb: OnErrorCallback): this;
+  public on(event: string, cb: (...args: any[]) => void): this {
+    return super.on(event, cb);
+  }
 
-		// async.eachSeries(this.router.routes, (r, cb) => this._subscribe(r.path, cb));
-	}
+  public once(event: 'connect', cb: OnConnectCallback): this;
+  public once(event: 'reconnect', cb: OnReconnect): this;
+  public once(event: 'offline', cb: OnOffline): this;
+  public once(event: 'close', cb: OnClose): this;
+  public once(event: 'message', cb: OnMessageCallback): this;
+  public once(event: 'error', cb: OnErrorCallback): this;
+  public once(event: string, cb: (...args: any[]) => void): this {
+    return super.once(event, cb);
+  }
 
-	_subscribe(topic: string, options?: IClientSubscribeOptions | ClientSubscribeCallback, cb?: ClientSubscribeCallback) {
-		if (typeof options === 'function') {
-			cb = options;
-			options = undefined;
-		}
-		options ? this.mqttclient.subscribe(mqttTopic(topic), options, cb) : this.mqttclient.subscribe(mqttTopic(topic), cb);
-	}
+  async _connected() {
+    await Promise.all(
+      this.router.routes.map(route => this._subscribe(route.path)),
+    );
+  }
 
-	_unsubscribe(topic, cb) {
-		this.mqttclient.unsubscribe(mqttTopic(topic), cb);
-	}
+  protected _subscribe(
+    topic: string | string[],
+    options?: IClientSubscribeOptions,
+  ): Promise<ISubscriptionGrant[]> {
+    return this._client.subscribe(compileTopic(topic as any), options as any);
+  }
 
-	_handleMessage(topic: string, payload: any, packet: any) {
-		let matched: Matched | undefined = this.router.match(topic);
+  protected async _handleMessage(topic: string, payload: any, packet: any) {
+    let matched: Matched | undefined = this.router.match(topic);
 
-		if (!matched) {
-			return this.log.debug('No handler to handle message with topic [%s]', topic);
-		}
+    if (!matched) {
+      debug('No handler to handle message with topic [%s]', topic);
+      return;
+    }
 
-		const matches: Matched[] = [];
-		while (matched) {
-			matches.push(matched);
-			matched = matched.next &&  matched.next();
-		}
+    const matches: Matched[] = [];
+    while (matched) {
+      matches.push(matched);
+      matched = matched.next();
+    }
 
-		for (let i = 0; i < matches.length; i++) {
-			const match = matches[i];
-			const sub = <Subscription> match.data;
-			if (sub && !sub.cancelled) {
-				const message = {
-					topic,
-					payload,
-					params: match.params,
-					splats: match.splats,
-					path: match.route,
-					packet
-				};
+    for (const match of matches) {
+      const sub = <Subscription>match.data;
+      if (sub && !sub.cancelled) {
+        const message = {
+          topic,
+          payload,
+          params: match.params,
+          path: match.route,
+          packet,
+        };
 
-				if (sub.handler.length === 1) {
-					sub.handler(message);
-				} else {
-					sub.handler(topic, payload, message);
-				}
-			}
-		}
-	}
+        if (sub.handler.length === 1) {
+          await sub.handler(message);
+        } else {
+          await sub.handler(topic, payload, message);
+        }
+      }
+    }
+  }
 
-	ready(cb) {
-		if (!cb) {
-			return this;
-		}
+  async ready(): Promise<this> {
+    if (this.connected) {
+      return this;
+    }
 
-		if (this.connected) {
-			cb();
-		} else {
-			this.once('connect', () => { // ignore connack
-				cb();
-			});
-		}
-	}
+    return new Promise(resolve => {
+      this.once('connect', () => resolve(this));
+    });
+  }
 
-	subscribe(topic: string, handler: SubHandler, cb?: ClientSubscribeCallback): Subscription;
-	subscribe(topic: string, handler: SubHandler, options: IClientSubscribeOptions, cb?: ClientSubscribeCallback): Subscription;
-	subscribe(topic: string, handler: SubHandler, options?: IClientSubscribeOptions | ClientSubscribeCallback, cb?: ClientSubscribeCallback): Subscription {
-		const sub = new Subscription(this, topic, handler);
-		if (this.connected) {
-			this._subscribe(topic, options, cb);
-		}
-		return sub;
-	}
+  async subscribe(
+    topic: string,
+    handler: SubHandler,
+    options?: IClientSubscribeOptions,
+  ): Promise<Subscription> {
+    const sub = new Subscription(this, topic, handler);
+    if (this.connected) {
+      await this._subscribe(topic, options);
+    }
+    return sub;
+  }
 
-	publish(topic, message, options?, cb?) {
-		this.mqttclient.publish(mqttTopic(topic), this.codec.encode(message), options, cb);
-	}
+  unsubscribe(topic: string | string[]) {
+    return this._client.unsubscribe(compileTopic(topic as any));
+  }
 
-	end(force?, cb?) {
-		this.mqttclient.end(force, cb);
-	}
+  publish(topic: string, message: any, options?: IClientPublishOptions) {
+    return this._client.publish(topic, this.codec.encode(message), options!);
+  }
+
+  end(force?: boolean) {
+    return this._client.end(force);
+  }
 }
 
-function mqttTopic(topic: string): string {
-	return topic.replace(/:[a-zA-Z0-9]+/g, '+')
-		.replace(/\*\*/g, '#')
-		.replace(/\*/g, '+');
+function compileTopic(topic: string): string;
+function compileTopic(topic: string[]): string[];
+function compileTopic(topic: string | string[]): string | string[] {
+  if (Array.isArray(topic)) {
+    return topic.map(t => compileTopic(t));
+  }
+  return topic
+    .replace(/:[a-zA-Z0-9]+\*$/g, '#')
+    .replace(/:[a-zA-Z0-9]+/g, '+')
+    .replace(/\(\.\*\)$/g, '#');
 }
