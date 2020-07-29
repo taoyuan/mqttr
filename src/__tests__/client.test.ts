@@ -228,6 +228,8 @@ describe('Client', () => {
         messages.push(message);
       });
 
+      expect(sub.topic).equal('$hello/:name');
+
       await client.publish('$hello/foo', {a: 1});
       await s.delay(50);
 
