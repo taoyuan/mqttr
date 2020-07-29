@@ -32,7 +32,7 @@ import {connect, Message} from '..';
       message = message!;
       console.log('-------------------------------------------------');
       console.log('topic  :', topic); // => /users/yvan/message/4321/ping
-      console.log('message:', payload); // => { hello: '霸王龙' }
+      console.log('message:', payload); // => { hello: '🦄' }
       console.log('params :', message.params); // => { userId: 'yvan', messageId: 4321, splats: [ 'ping' ] }
       console.log('path   :', message.path); // => '/users/:userId/message/:messageId/:splats*'
       console.log('packet :', message.packet); // => {...} packet received packet, as defined in mqtt-packet
@@ -52,7 +52,7 @@ import {connect, Message} from '..';
 
   await client.ready();
 
-  await client.publish('/users/yvan/message/4321/ping', {hello: '霸王龙'});
+  await client.publish('/users/yvan/message/4321/ping', {hello: '🦄'});
 
   // eslint-disable-next-line @typescript-eslint/no-misused-promises
   setTimeout(() => client.end(true), 10);
