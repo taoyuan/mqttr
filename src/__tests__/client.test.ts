@@ -1,16 +1,17 @@
 import {expect} from '@tib/testlab';
+import {Defer} from '@tib/defer';
 import * as mqtt from 'async-mqtt';
 import {Aedes} from 'aedes';
 import {Server} from 'net';
-import * as s from './support';
-import {Deferred, delay, noop} from './support';
-import {Client, Message} from '..';
 import getPort from 'get-port';
+import * as s from './support';
+import {delay, noop} from './support';
+import {Client, Message} from '..';
 
 describe('Client', () => {
   describe('connectivity', () => {
     it('should connect', async () => {
-      const d = new Deferred();
+      const d = new Defer();
       const [aedes, server, port] = await s.createMQTTServer();
 
       const client = new Client(mqtt.connect({port}));
@@ -31,7 +32,7 @@ describe('Client', () => {
     });
 
     it('should reconnect', async () => {
-      const d = new Deferred();
+      const d = new Defer();
       // eslint-disable-next-line prefer-const
       let [aedes, server, port] = await s.createMQTTServer();
 
@@ -62,7 +63,7 @@ describe('Client', () => {
     });
 
     it('should emit error if can not connect', async () => {
-      const d = new Deferred();
+      const d = new Defer();
       const port = await getPort();
       const client = new Client(mqtt.connect({port}));
       client.once('error', () => d.resolve());
@@ -71,7 +72,7 @@ describe('Client', () => {
     });
 
     it('should return immediately to call ready if has been connected', async () => {
-      const d = new Deferred();
+      const d = new Defer();
       const [aedes, server, port] = await s.createMQTTServer();
 
       const client = new Client(mqtt.connect({port}));
@@ -112,7 +113,7 @@ describe('Client', () => {
     });
 
     it('should work', async () => {
-      const d = new Deferred();
+      const d = new Defer();
 
       await client.subscribe('$hello/:name', function (
         topic,
@@ -130,7 +131,7 @@ describe('Client', () => {
     });
 
     it('should work with multiple clients', async () => {
-      const d = new Deferred();
+      const d = new Defer();
 
       const client2 = new Client(mqtt.connect(url));
       await client2.subscribe('$hello/:name', async function (
@@ -151,7 +152,7 @@ describe('Client', () => {
     });
 
     it('should work with char wild char', async () => {
-      const d = new Deferred();
+      const d = new Defer();
       const data = {boo: 'foo'};
       await client.subscribe('foo/:splat*', function (topic, payload) {
         expect(topic).equal('foo/bar');
@@ -163,7 +164,7 @@ describe('Client', () => {
     });
 
     it('should work with two char wild char', async () => {
-      const d = new Deferred();
+      const d = new Defer();
       const data = {boo: 'foo'};
       await client.subscribe('foo/:splats*', function (
         topic,
@@ -184,7 +185,7 @@ describe('Client', () => {
     });
 
     it('should work with params', async () => {
-      const d = new Deferred();
+      const d = new Defer();
       const data = {boo: 'foo'};
       await client.subscribe('foo/:bar', function (topic, payload, route) {
         expect(data).deepEqual(payload);
@@ -279,7 +280,7 @@ describe('Client', () => {
     });
 
     it('should work with single parameter subscription handler', async () => {
-      const d = new Deferred();
+      const d = new Defer();
 
       await client.subscribe('$hello/:name', function (message: Message) {
         expect(message.params.name).equal('foo');
@@ -314,7 +315,7 @@ describe('Client', () => {
     });
 
     it('should emit error when sub handler has an exception', async function () {
-      const d = new Deferred();
+      const d = new Defer();
 
       client.once('error', err => {
         try {
@@ -334,7 +335,7 @@ describe('Client', () => {
     });
 
     it('should support "(.*)" in topic', async function () {
-      const d = new Deferred();
+      const d = new Defer();
 
       await client.subscribe('$hello/(.*)', function (message: Message) {
         try {

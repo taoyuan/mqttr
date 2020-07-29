@@ -52,6 +52,7 @@
   },
   "devDependencies": {
     "@tib/build": "^6.3.0",
+    "@tib/defer": "^0.1.2",
     "@tib/eslint-config": "^8.2.0",
     "@tib/testlab": "^3.4.0",
     "@types/async": "^3.2.3",
