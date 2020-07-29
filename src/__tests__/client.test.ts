@@ -6,7 +6,11 @@ import {Server} from 'net';
 import getPort from 'get-port';
 import * as s from './support';
 import {delay, noop} from './support';
-import {Client, Message} from '..';
+import {Client, Message, Subscription} from '..';
+
+class HackedSubscription extends Subscription {
+  _cancelled: boolean;
+}
 
 describe('Client', () => {
   describe('connectivity', () => {
@@ -243,7 +247,7 @@ describe('Client', () => {
       await client.publish('$hello/foo', {a: 1});
       await s.delay(50);
 
-      sub.cancelled = true;
+      (sub as HackedSubscription)._cancelled = true;
       await client.publish('$hello/foo', {a: 1});
 
       await s.delay(50);
@@ -270,11 +274,9 @@ describe('Client', () => {
       });
 
       expect(sub.cancelled).false();
-      expect(sub.client.router).lengthOf(1);
 
       await sub.cancel();
       expect(sub.cancelled).true();
-      expect(sub.client.router).lengthOf(0);
 
       await sub.cancel();
     });
