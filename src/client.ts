@@ -24,13 +24,13 @@ export interface Message {
   packet: any;
 }
 
-export type StandardSubHandler = (message: Message) => AsyncOrSync<any>;
-export type ExpandedSubHandler = (
+export type StandardMessageHandler = (message: Message) => AsyncOrSync<void>;
+export type ExpandedMessageHandler = (
   topic: string,
   payload: any,
-  message?: Message,
-) => AsyncOrSync<any>;
-export type SubHandler = StandardSubHandler | ExpandedSubHandler;
+  message: Message,
+) => AsyncOrSync<void>;
+export type MessageHandler = StandardMessageHandler | ExpandedMessageHandler;
 
 export type OnConnectCallback = (packet: Packet) => void;
 export type OnMessageCallback = (
@@ -44,16 +44,16 @@ export type OnOffline = () => void;
 export type OnClose = () => void;
 
 export class Client extends EventEmitter {
-  public _client: AsyncMqttClient;
-  public codec: Codec;
-  public router: Router;
+  protected codec: Codec;
+  client: AsyncMqttClient;
+  router: Router;
 
   constructor(client: AsyncMqttClient, options?: ClientOptions) {
     super();
 
     options = options ?? <ClientOptions>{};
 
-    this._client = client;
+    this.client = client;
     this.codec = options.codec ?? new JsonCodec();
 
     debug('Using codec:', this.codec.name);
@@ -104,42 +104,42 @@ export class Client extends EventEmitter {
   }
 
   get connected() {
-    return this._client.connected;
+    return this.client.connected;
   }
 
   get disconnecting() {
-    return this._client.disconnecting;
+    return this.client.disconnecting;
   }
 
   get disconnected() {
-    return this._client.disconnected;
+    return this.client.disconnected;
   }
 
   get reconnecting() {
-    return this._client.reconnecting;
+    return this.client.reconnecting;
   }
 
-  public on(event: 'connect', cb: OnConnectCallback): this;
-  public on(event: 'reconnect', cb: OnReconnect): this;
-  public on(event: 'offline', cb: OnOffline): this;
-  public on(event: 'close', cb: OnClose): this;
-  public on(event: 'message', cb: OnMessageCallback): this;
-  public on(event: 'error', cb: OnErrorCallback): this;
-  public on(event: string, cb: (...args: any[]) => void): this {
+  on(event: 'connect', cb: OnConnectCallback): this;
+  on(event: 'reconnect', cb: OnReconnect): this;
+  on(event: 'offline', cb: OnOffline): this;
+  on(event: 'close', cb: OnClose): this;
+  on(event: 'message', cb: OnMessageCallback): this;
+  on(event: 'error', cb: OnErrorCallback): this;
+  on(event: string, cb: (...args: any[]) => void): this {
     return super.on(event, cb);
   }
 
-  public once(event: 'connect', cb: OnConnectCallback): this;
-  public once(event: 'reconnect', cb: OnReconnect): this;
-  public once(event: 'offline', cb: OnOffline): this;
-  public once(event: 'close', cb: OnClose): this;
-  public once(event: 'message', cb: OnMessageCallback): this;
-  public once(event: 'error', cb: OnErrorCallback): this;
-  public once(event: string, cb: (...args: any[]) => void): this {
+  once(event: 'connect', cb: OnConnectCallback): this;
+  once(event: 'reconnect', cb: OnReconnect): this;
+  once(event: 'offline', cb: OnOffline): this;
+  once(event: 'close', cb: OnClose): this;
+  once(event: 'message', cb: OnMessageCallback): this;
+  once(event: 'error', cb: OnErrorCallback): this;
+  once(event: string, cb: (...args: any[]) => void): this {
     return super.once(event, cb);
   }
 
-  async _connected() {
+  protected async _connected() {
     await Promise.all(
       this.router.routes.map(route => this._subscribe(route.path)),
     );
@@ -149,7 +149,7 @@ export class Client extends EventEmitter {
     topic: string | string[],
     options?: IClientSubscribeOptions,
   ): Promise<ISubscriptionGrant[]> {
-    return this._client.subscribe(compileTopic(topic as any), options as any);
+    return this.client.subscribe(compileTopic(topic as any), options as any);
   }
 
   protected async _handleMessage(topic: string, payload: any, packet: any) {
@@ -198,7 +198,7 @@ export class Client extends EventEmitter {
 
   async subscribe(
     topic: string,
-    handler: SubHandler,
+    handler: MessageHandler,
     options?: IClientSubscribeOptions,
   ): Promise<Subscription> {
     const sub = new Subscription(this, topic, handler);
@@ -209,15 +209,15 @@ export class Client extends EventEmitter {
   }
 
   unsubscribe(topic: string | string[]) {
-    return this._client.unsubscribe(compileTopic(topic as any));
+    return this.client.unsubscribe(compileTopic(topic as any));
   }
 
   publish(topic: string, message: any, options?: IClientPublishOptions) {
-    return this._client.publish(topic, this.codec.encode(message), options!);
+    return this.client.publish(topic, this.codec.encode(message), options!);
   }
 
   end(force?: boolean) {
-    return this._client.end(force);
+    return this.client.end(force);
   }
 }
 
