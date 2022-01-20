@@ -1,8 +1,7 @@
 # mqttr
 
 [![NPM version][npm-image]][npm-url] [![Build Status][travis-image]][travis-url]
-[![Dependency Status][daviddm-image]][daviddm-url]
-[![Coverage percentage][coveralls-image]][coveralls-url]
+[![Dependency Status][daviddm-image]][daviddm-url] [![Coverage percentage][coveralls-image]][coveralls-url]
 
 > A routable mqtt library based on mqtt.js
 
@@ -58,14 +57,11 @@ import {connect, Message} from 'mqttr';
   );
 
   // one context param handler
-  await client.subscribe(
-    '/users/:userId/message/:messageId/:splats*',
-    (message: Message) => {
-      console.log('-------------------------------------------------');
-      console.log(message);
-      console.log();
-    },
-  );
+  await client.subscribe('/users/:userId/message/:messageId/:splats*', (message: Message) => {
+    console.log('-------------------------------------------------');
+    console.log(message);
+    console.log();
+  });
 
   await client.ready();
 

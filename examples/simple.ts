@@ -41,14 +41,11 @@ import {connect, Message} from '..';
   );
 
   // one context param handler
-  await client.subscribe(
-    '/users/:userId/message/:messageId/:splats*',
-    (message: Message) => {
-      console.log('-------------------------------------------------');
-      console.log(message);
-      console.log();
-    },
-  );
+  await client.subscribe('/users/:userId/message/:messageId/:splats*', (message: Message) => {
+    console.log('-------------------------------------------------');
+    console.log(message);
+    console.log();
+  });
 
   await client.ready();
 

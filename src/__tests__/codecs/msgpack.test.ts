@@ -1,4 +1,3 @@
-import {expect} from '@tib/testlab';
 import {MsgpackCodec} from '../../codecs/msgpack';
 
 class MyType {
@@ -39,12 +38,12 @@ describe('codec/msgpack', function () {
   it('encode', function () {
     const codec = new MsgpackCodec({coders});
     const encoded = codec.encode(sampleObject).toString('hex');
-    expect(encoded).equal(sampleEncoded);
+    expect(encoded).toEqual(sampleEncoded);
   });
 
   it('decode', function () {
     const codec = new MsgpackCodec({coders});
     const decoded = codec.decode(sampleEncoded);
-    expect(decoded).deepEqual(sampleObject);
+    expect(decoded).toEqual(sampleObject);
   });
 });

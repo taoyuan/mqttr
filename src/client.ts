@@ -25,19 +25,11 @@ export interface Message {
 }
 
 export type StandardMessageHandler = (message: Message) => AsyncOrSync<void>;
-export type ExpandedMessageHandler = (
-  topic: string,
-  payload: any,
-  message: Message,
-) => AsyncOrSync<void>;
+export type ExpandedMessageHandler = (topic: string, payload: any, message: Message) => AsyncOrSync<void>;
 export type MessageHandler = StandardMessageHandler | ExpandedMessageHandler;
 
 export type OnConnectCallback = (packet: Packet) => void;
-export type OnMessageCallback = (
-  topic: string,
-  payload: Buffer,
-  packet: Packet,
-) => void;
+export type OnMessageCallback = (topic: string, payload: Buffer, packet: Packet) => void;
 export type OnErrorCallback = (error: Error) => void;
 export type OnReconnect = () => void;
 export type OnOffline = () => void;
@@ -140,15 +132,10 @@ export class Client extends EventEmitter {
   }
 
   protected async _connected() {
-    await Promise.all(
-      this.router.routes.map(route => this._subscribe(route.path)),
-    );
+    await Promise.all(this.router.routes.map(route => this._subscribe(route.path)));
   }
 
-  protected _subscribe(
-    topic: string | string[],
-    options?: IClientSubscribeOptions,
-  ): Promise<ISubscriptionGrant[]> {
+  protected _subscribe(topic: string | string[], options?: IClientSubscribeOptions): Promise<ISubscriptionGrant[]> {
     return this.client.subscribe(compileTopic(topic as any), options as any);
   }
 
@@ -196,11 +183,7 @@ export class Client extends EventEmitter {
     });
   }
 
-  async subscribe(
-    topic: string,
-    handler: MessageHandler,
-    options?: IClientSubscribeOptions,
-  ): Promise<Subscription> {
+  async subscribe(topic: string, handler: MessageHandler, options?: IClientSubscribeOptions): Promise<Subscription> {
     const sub = new Subscription(this, topic, handler);
     if (this.connected) {
       await this._subscribe(topic, options);

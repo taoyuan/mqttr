@@ -1,12 +1,12 @@
-import {expect} from '@tib/testlab';
-import {Defer} from '@tib/defer';
-import * as mqtt from 'async-mqtt';
-import {Aedes} from 'aedes';
 import {Server} from 'net';
 import getPort from 'get-port';
+import {Aedes} from 'aedes';
+import * as mqtt from 'async-mqtt';
+import {defer} from '@jil/common/async/defer';
+import {delay} from '@jil/common/async/timeout';
 import * as s from './support';
-import {delay, noop} from './support';
 import {Client, Message, Subscription} from '..';
+import {noop} from './support';
 
 class HackedSubscription extends Subscription {
   _cancelled: boolean;
@@ -15,28 +15,28 @@ class HackedSubscription extends Subscription {
 describe('Client', () => {
   describe('connectivity', () => {
     it('should connect', async () => {
-      const d = new Defer();
+      const d = defer();
       const [aedes, server, port] = await s.createMQTTServer();
 
       const client = new Client(mqtt.connect({port}));
-      expect(client.connected).not.ok();
-      expect(client.disconnecting).not.ok();
-      expect(client.disconnected).not.ok();
-      expect(client.reconnecting).not.ok();
+      expect(client.connected).toBeFalsy();
+      expect(client.disconnecting).toBeFalsy();
+      expect(client.disconnected).toBeFalsy();
+      expect(client.reconnecting).toBeFalsy();
 
       client.once('connect', () => d.resolve());
       await d;
-      expect(client.connected).ok();
-      expect(client.disconnecting).not.ok();
-      expect(client.disconnected).not.ok();
-      expect(client.reconnecting).not.ok();
+      expect(client.connected).toBeTruthy();
+      expect(client.disconnecting).toBeFalsy();
+      expect(client.disconnected).toBeFalsy();
+      expect(client.reconnecting).toBeFalsy();
 
       await client.end(true);
       await s.close(aedes, server);
     });
 
     it('should reconnect', async () => {
-      const d = new Defer();
+      const d = defer();
       // eslint-disable-next-line prefer-const
       let [aedes, server, port] = await s.createMQTTServer();
 
@@ -56,8 +56,8 @@ describe('Client', () => {
       await delay(50);
 
       // should reconnecting
-      expect(client.connected).not.ok();
-      expect(client.reconnecting).ok();
+      expect(client.connected).toBeFalsy();
+      expect(client.reconnecting).toBeTruthy();
 
       // should reconnected
       await d;
@@ -67,7 +67,7 @@ describe('Client', () => {
     });
 
     it('should emit error if can not connect', async () => {
-      const d = new Defer();
+      const d = defer();
       const port = await getPort();
       const client = new Client(mqtt.connect({port}));
       client.once('error', () => d.resolve());
@@ -76,7 +76,7 @@ describe('Client', () => {
     });
 
     it('should return immediately to call ready if has been connected', async () => {
-      const d = new Defer();
+      const d = defer();
       const [aedes, server, port] = await s.createMQTTServer();
 
       const client = new Client(mqtt.connect({port}));
@@ -98,12 +98,12 @@ describe('Client', () => {
 
     let client: Client;
 
-    before(async () => {
+    beforeAll(async () => {
       [aedes, server, port] = await s.createMQTTServer();
       url = `mqtt://127.0.0.1:${port}`;
     });
 
-    after(async () => {
+    afterAll(async () => {
       await s.close(aedes, server);
     });
 
@@ -117,15 +117,11 @@ describe('Client', () => {
     });
 
     it('should work', async () => {
-      const d = new Defer();
+      const d = defer();
 
-      await client.subscribe('$hello/:name', function (
-        topic,
-        payload,
-        message,
-      ) {
-        expect(message!.params.name).equal('foo');
-        expect(payload).deepEqual({a: 1});
+      await client.subscribe('$hello/:name', function (topic, payload, message) {
+        expect(message!.params.name).toEqual('foo');
+        expect(payload).toEqual({a: 1});
         d.resolve();
       });
 
@@ -135,16 +131,12 @@ describe('Client', () => {
     });
 
     it('should work with multiple clients', async () => {
-      const d = new Defer();
+      const d = defer();
 
       const client2 = new Client(mqtt.connect(url));
-      await client2.subscribe('$hello/:name', async function (
-        topic,
-        payload,
-        message,
-      ) {
-        expect(message!.params.name).equal('foo');
-        expect(payload).deepEqual({a: 1});
+      await client2.subscribe('$hello/:name', async function (topic, payload, message) {
+        expect(message!.params.name).toEqual('foo');
+        expect(payload).toEqual({a: 1});
         await client2.end(true);
         d.resolve();
       });
@@ -156,11 +148,11 @@ describe('Client', () => {
     });
 
     it('should work with char wild char', async () => {
-      const d = new Defer();
+      const d = defer();
       const data = {boo: 'foo'};
       await client.subscribe('foo/:splat*', function (topic, payload) {
-        expect(topic).equal('foo/bar');
-        expect(data).deepEqual(payload);
+        expect(topic).toEqual('foo/bar');
+        expect(data).toEqual(payload);
         d.resolve();
       });
       await client.publish('foo/bar', data);
@@ -168,17 +160,13 @@ describe('Client', () => {
     });
 
     it('should work with two char wild char', async () => {
-      const d = new Defer();
+      const d = defer();
       const data = {boo: 'foo'};
-      await client.subscribe('foo/:splats*', function (
-        topic,
-        payload,
-        message,
-      ) {
+      await client.subscribe('foo/:splats*', function (topic, payload, message) {
         try {
-          expect(topic).equal('foo/bar/hello');
-          expect(message?.params).containDeep({splats: ['bar', 'hello']});
-          expect(data).deepEqual(payload);
+          expect(topic).toEqual('foo/bar/hello');
+          expect(message?.params).toEqual({splats: ['bar', 'hello']});
+          expect(data).toEqual(payload);
           d.resolve();
         } catch (e) {
           d.reject(e);
@@ -189,11 +177,11 @@ describe('Client', () => {
     });
 
     it('should work with params', async () => {
-      const d = new Defer();
+      const d = defer();
       const data = {boo: 'foo'};
       await client.subscribe('foo/:bar', function (topic, payload, route) {
-        expect(data).deepEqual(payload);
-        expect(route!.params.bar).equal('bar');
+        expect(data).toEqual(payload);
+        expect(route!.params.bar).toEqual('bar');
         d.resolve();
       });
       await client.publish('foo/bar', data);
@@ -204,22 +192,18 @@ describe('Client', () => {
       let caught = false;
       const data = {boo: 'foo'};
 
-      await client.subscribe('foo/should_not_match/:bar', function (
-        topic,
-        payload,
-        route,
-      ) {
+      await client.subscribe('foo/should_not_match/:bar', function () {
         throw new Error('should not enter here');
       });
 
       await client.subscribe('foo/:bar', function (topic, payload, route) {
-        expect(data).deepEqual(payload);
-        expect(route!.params.bar).equal('bar');
+        expect(data).toEqual(payload);
+        expect(route!.params.bar).toEqual('bar');
         caught = true;
       });
       await client.publish('foo/bar', data);
       await delay(500);
-      expect(caught).ok();
+      expect(caught).toBeTruthy();
     });
 
     it('should not matched when subscription cancelled', async () => {
@@ -228,16 +212,16 @@ describe('Client', () => {
         messages.push(message);
       });
 
-      expect(sub.topic).equal('$hello/:name');
+      expect(sub.topic).toEqual('$hello/:name');
 
       await client.publish('$hello/foo', {a: 1});
-      await s.delay(50);
+      await delay(50);
 
       await sub.cancel();
       await client.publish('$hello/foo', {a: 1});
 
-      await s.delay(50);
-      expect(messages).lengthOf(1);
+      await delay(50);
+      expect(messages).toHaveLength(1);
     });
 
     it('should not matched when subscription.cancelled set as true', async () => {
@@ -247,13 +231,13 @@ describe('Client', () => {
       });
 
       await client.publish('$hello/foo', {a: 1});
-      await s.delay(50);
+      await delay(50);
 
       (sub as HackedSubscription)._cancelled = true;
       await client.publish('$hello/foo', {a: 1});
 
-      await s.delay(50);
-      expect(messages).lengthOf(1);
+      await delay(50);
+      expect(messages).toHaveLength(1);
     });
 
     it('should not matched if route has been deleted', async () => {
@@ -266,8 +250,8 @@ describe('Client', () => {
       client.router.routes = [];
 
       await client.publish('$hello/foo', {a: 1});
-      await s.delay(50);
-      expect(messages).lengthOf(0);
+      await delay(50);
+      expect(messages).toHaveLength(0);
     });
 
     it('should do nothing to call cancel after subscription has been canceled', async () => {
@@ -275,20 +259,20 @@ describe('Client', () => {
         throw new Error('Should not run here');
       });
 
-      expect(sub.cancelled).false();
+      expect(sub.cancelled).toBe(false);
 
       await sub.cancel();
-      expect(sub.cancelled).true();
+      expect(sub.cancelled).toBe(true);
 
       await sub.cancel();
     });
 
     it('should work with single parameter subscription handler', async () => {
-      const d = new Defer();
+      const d = defer();
 
       await client.subscribe('$hello/:name', function (message: Message) {
-        expect(message.params.name).equal('foo');
-        expect(message.payload).deepEqual({a: 1});
+        expect(message.params.name).toEqual('foo');
+        expect(message.payload).toEqual({a: 1});
         d.resolve();
       });
 
@@ -315,15 +299,15 @@ describe('Client', () => {
       await client.publish('$hello2/foo', {a: 4});
 
       await delay(50);
-      expect(messages).lengthOf(3);
+      expect(messages).toHaveLength(3);
     });
 
     it('should emit error when sub handler has an exception', async function () {
-      const d = new Defer();
+      const d = defer();
 
       client.once('error', err => {
         try {
-          expect(err.message).match(/Boom!/);
+          expect(err.message).toMatch(/Boom!/);
           d.resolve();
         } catch (e) {
           d.reject(e);
@@ -339,11 +323,11 @@ describe('Client', () => {
     });
 
     it('should support "(.*)" in topic', async function () {
-      const d = new Defer();
+      const d = defer();
 
       await client.subscribe('$hello/(.*)', function (message: Message) {
         try {
-          expect(message.params).containDeep({0: 'foo/bar'});
+          expect(message.params).toEqual({0: 'foo/bar'});
           d.resolve();
         } catch (e) {
           d.reject(e);

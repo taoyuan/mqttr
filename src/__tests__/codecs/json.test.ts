@@ -1,5 +1,4 @@
 import {JsonCodec} from '../../codecs/json';
-import {expect} from '@tib/testlab';
 
 const sampleObject = {
   foundation: 'MQTTR',
@@ -24,7 +23,7 @@ describe('codec/json', function () {
     });
 
     const encoded = codec.encode(sampleObject);
-    expect(encoded).deepEqual(sampleEncoded);
+    expect(encoded).toEqual(sampleEncoded);
   });
 
   it('decode', function () {
@@ -40,9 +39,9 @@ describe('codec/json', function () {
     });
 
     let decoded = codec.decode(sampleEncoded);
-    expect(decoded).deepEqual(sampleDecoded);
+    expect(decoded).toEqual(sampleDecoded);
 
     decoded = codec.decode(Buffer.from(sampleEncoded));
-    expect(decoded).deepEqual(sampleDecoded);
+    expect(decoded).toEqual(sampleDecoded);
   });
 });

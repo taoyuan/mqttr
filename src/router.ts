@@ -28,10 +28,7 @@ export class Route {
   src: string;
   data: any;
 
-  constructor(
-    path: string,
-    options?: ParseOptions & TokensToRegexpOptions & RegexpToFunctionOptions,
-  ) {
+  constructor(path: string, options?: ParseOptions & TokensToRegexpOptions & RegexpToFunctionOptions) {
     this.path = path;
     path = path.replace(/\$/, '\\$');
     this.match = createMatch(path, options);
@@ -76,10 +73,7 @@ export class Router {
     let i;
     const len = this.routes.length;
     for (i = 0; i < len; i++) {
-      if (
-        path.test(this.routes[i].src) &&
-        (!data || this.routes[i].data === data)
-      ) {
+      if (path.test(this.routes[i].src) && (!data || this.routes[i].data === data)) {
         break;
       }
     }
@@ -107,11 +101,7 @@ export class Router {
  * @param  {Number} startAt
  * @return {Object}
  */
-export function match(
-  routes: Route[],
-  uri: string,
-  startAt?: number,
-): Omit<Matched, 'next'> | undefined {
+export function match(routes: Route[], uri: string, startAt?: number): Omit<Matched, 'next'> | undefined {
   startAt = startAt ?? 0;
   for (let len = routes.length, i = startAt; i < len; ++i) {
     const route = routes[i];
