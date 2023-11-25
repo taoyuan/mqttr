@@ -1,5 +1,5 @@
 import {EventEmitter} from 'events';
-import {AsyncMqttClient, IClientSubscribeOptions} from 'async-mqtt';
+import {MqttClient, IClientSubscribeOptions} from 'mqtt';
 import {IClientPublishOptions, ISubscriptionGrant} from 'mqtt';
 import {Packet} from 'mqtt-packet';
 import {Codec} from './types';
@@ -37,10 +37,10 @@ export type OnClose = () => void;
 
 export class Client extends EventEmitter {
   protected codec: Codec;
-  client: AsyncMqttClient;
+  client: MqttClient;
   router: Router;
 
-  constructor(client: AsyncMqttClient, options?: ClientOptions) {
+  constructor(client: MqttClient, options?: ClientOptions) {
     super();
 
     options = options ?? <ClientOptions>{};
@@ -136,7 +136,7 @@ export class Client extends EventEmitter {
   }
 
   protected _subscribe(topic: string | string[], options?: IClientSubscribeOptions): Promise<ISubscriptionGrant[]> {
-    return this.client.subscribe(compileTopic(topic as any), options as any);
+    return this.client.subscribeAsync(compileTopic(topic as any), options as any);
   }
 
   protected async _handleMessage(topic: string, payload: any, packet: any) {
@@ -192,15 +192,15 @@ export class Client extends EventEmitter {
   }
 
   unsubscribe(topic: string | string[]) {
-    return this.client.unsubscribe(compileTopic(topic as any));
+    return this.client.unsubscribeAsync(compileTopic(topic as any));
   }
 
   publish(topic: string, message: any, options?: IClientPublishOptions) {
-    return this.client.publish(topic, this.codec.encode(message), options!);
+    return this.client.publishAsync(topic, this.codec.encode(message), options!);
   }
 
   end(force?: boolean) {
-    return this.client.end(force);
+    return this.client.endAsync(force);
   }
 }
 

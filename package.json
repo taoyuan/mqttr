@@ -36,9 +36,9 @@
     "posttest": "yarn lint"
   },
   "dependencies": {
-    "async-mqtt": "^2.6.3",
     "bl": "^6.0.0",
     "debug": "^4.3.4",
+    "mqtt": "^5.3.0",
     "msgpack5": "^6.0.2",
     "path-to-regexp": "^6.2.1",
     "tslib": "^2.4.1"

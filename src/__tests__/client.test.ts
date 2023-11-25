@@ -1,7 +1,7 @@
 import {Server} from 'net';
 import getPort from 'get-port';
 import {Aedes} from 'aedes';
-import * as mqtt from 'async-mqtt';
+import * as mqtt from 'mqtt';
 import {defer} from '@jil/common/async/defer';
 import {delay} from '@jil/common/async/timeout';
 import * as s from './support';
