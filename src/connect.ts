@@ -1,5 +1,5 @@
 import {IClientOptions} from 'mqtt';
-import * as mqtt from 'async-mqtt';
+import * as mqtt from 'mqtt';
 import {Codec} from './types';
 import {Client, ClientOptions} from './client';
 
@@ -15,5 +15,6 @@ export function connect(url?: string | ConnectOptions, opts?: ConnectOptions): C
     url = undefined;
   }
   opts = Object.assign({qos: 1}, opts);
-  return new Client(mqtt.connect(url, opts), <ClientOptions>opts);
+  const client = url != null ? mqtt.connect(url, opts) : mqtt.connect(opts);
+  return new Client(client, <ClientOptions>opts);
 }
